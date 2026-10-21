@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-104",
+  "received_at": "2026-10-15T08:30:00+03:00",
+  "channel": "mobile app",
+  "requester": {
+    "name": "Tudor Vatavu",
+    "email": "tudor.vatavu@example.invalid",
+    "customer_id": "C-1002"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated mobile app session"
+  },
+  "request_type": "rectification",
+  "message": "Buna ziua, adresa mea s-a schimbat. Noua adresa este str. Teilor 14, ap. 9, Balti. Va rog sa o corectati."
+}

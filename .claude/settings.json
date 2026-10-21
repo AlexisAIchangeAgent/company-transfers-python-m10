@@ -1,0 +1,88 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(.venv\\Scripts\\python -m pytest)",
+      "PowerShell(.venv\\Scripts\\python -m pytest tests/unit/test_standard_mdl_fee.py -k minimum)",
+      "PowerShell(.venv\\Scripts\\python -m behave)",
+      "PowerShell(.venv\\Scripts\\python -m ruff check .)",
+      "PowerShell(.venv\\Scripts\\python -m ruff format --check .)",
+      "Bash(.venv/bin/python -m pytest)",
+      "Bash(.venv/bin/python -m pytest tests/unit/test_standard_mdl_fee.py -k minimum)",
+      "Bash(.venv/bin/python -m behave)",
+      "Bash(.venv/bin/python -m ruff check .)",
+      "Bash(.venv/bin/python -m ruff format --check .)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/secrets/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Bash(cat *.env*)",
+      "Bash(head *.env*)",
+      "Bash(less *.env*)",
+      "Bash(type *.env*)",
+      "PowerShell(Get-Content *.env*)",
+      "PowerShell(type *.env*)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(ssh *)",
+      "Bash(scp *)",
+      "PowerShell(curl *)",
+      "PowerShell(curl.exe *)",
+      "PowerShell(wget *)",
+      "PowerShell(Invoke-WebRequest *)",
+      "PowerShell(Invoke-RestMethod *)",
+      "PowerShell(iwr *)",
+      "PowerShell(irm *)"
+    ],
+    "ask": [
+      "Edit(.github/**)",
+      "Edit(.env)",
+      "Edit(.env.*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& \"$env:CLAUDE_PROJECT_DIR\\.claude\\hooks\\guard-protected-files.ps1\"",
+            "shell": "powershell"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& \"$env:CLAUDE_PROJECT_DIR\\.claude\\hooks\\block-destructive-git.ps1\"",
+            "shell": "powershell"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "& \"$env:CLAUDE_PROJECT_DIR\\.claude\\hooks\\run-unit-tests.ps1\"",
+            "shell": "powershell",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "maib-training-python-contract@maib-claude-plugins-python": true,
+    "maib-training-docs@maib-claude-plugins-python": true
+  }
+}

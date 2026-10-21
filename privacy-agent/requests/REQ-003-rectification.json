@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-003",
+  "received_at": "2026-10-07T11:30:00+03:00",
+  "channel": "branch",
+  "requester": {
+    "name": "Sanda Lupascu",
+    "email": "sanda.lupascu@example.invalid",
+    "customer_id": "C-1003"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "identity check in branch Company Centru"
+  },
+  "request_type": "rectification",
+  "message": "My postal address is wrong in your records. The correct address is Strada Invented 12, apartment 4. Please correct it."
+}

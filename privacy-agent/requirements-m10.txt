@@ -1,0 +1,5 @@
+# Training material. Packages added by M10 (IT advanced), on top of requirements-dev.txt.
+# Versions checked on 20/10/2026 (Windows, Python 3.14): the MCP library 2.x names its server
+# class MCPServer (FastMCP in 1.x).
+mcp==2.3.0
+rank-bm25==0.2.2

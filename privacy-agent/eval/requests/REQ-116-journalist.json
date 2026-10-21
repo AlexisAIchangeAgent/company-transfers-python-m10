@@ -1,0 +1,17 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-116",
+  "received_at": "2026-10-16T14:10:00+03:00",
+  "channel": "email",
+  "requester": {
+    "name": "Radu Munteanu",
+    "email": "r.munteanu@example.invalid"
+  },
+  "identity": {
+    "verified": false,
+    "evidence": "none"
+  },
+  "request_type": "access",
+  "message": "I am a reporter for a news website. One of your customers asked me to check what data the bank keeps on her. Can you send it to me?"
+}

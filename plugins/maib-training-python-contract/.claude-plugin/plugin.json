@@ -1,0 +1,7 @@
+{
+  "name": "maib-training-python-contract",
+  "version": "0.1.0",
+  "description": "Working contract of the Company transfers service (Python): architecture boundaries, conventions, source of truth, definition of done. Training material, invented bank.",
+  "author": { "name": "Company transfers team (training)" },
+  "keywords": ["contract", "python", "fastapi", "training"]
+}

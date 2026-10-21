@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-005",
+  "received_at": "2026-10-09T08:05:00+03:00",
+  "channel": "mobile app",
+  "requester": {
+    "name": "Tudor Vatavu",
+    "email": "tudor.vatavu@example.invalid",
+    "customer_id": "C-1002"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated mobile app session"
+  },
+  "request_type": null,
+  "message": "I am not happy with how my data is used. Please do something about it."
+}

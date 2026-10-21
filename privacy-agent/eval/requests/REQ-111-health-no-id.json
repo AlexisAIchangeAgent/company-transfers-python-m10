@@ -1,0 +1,14 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-111",
+  "received_at": "2026-10-17T07:45:00+03:00",
+  "channel": "email",
+  "requester": {
+    "name": "Lidia Cazacu",
+    "email": "lidia.cazacu@example.invalid"
+  },
+  "identity": null,
+  "request_type": "erasure",
+  "message": "Delete the doctor's letter about my surgery that I sent with my credit application."
+}

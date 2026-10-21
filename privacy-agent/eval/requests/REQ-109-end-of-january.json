@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-109",
+  "received_at": "2026-01-31T12:00:00+02:00",
+  "channel": "mobile app",
+  "requester": {
+    "name": "Tudor Vatavu",
+    "email": "tudor.vatavu@example.invalid",
+    "customer_id": "C-1002"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated mobile app session"
+  },
+  "request_type": "rectification",
+  "message": "My phone number is wrong in your records. Please correct it."
+}

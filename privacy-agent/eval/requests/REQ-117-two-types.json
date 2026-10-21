@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-117",
+  "received_at": "2026-10-17T10:30:00+03:00",
+  "channel": "mobile app",
+  "requester": {
+    "name": "Sanda Lupascu",
+    "email": "sanda.lupascu@example.invalid",
+    "customer_id": "C-1003"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated mobile app session"
+  },
+  "request_type": "erasure",
+  "message": "Please forget my old address, the new one is already in the app. And I do not want your marketing anymore."
+}

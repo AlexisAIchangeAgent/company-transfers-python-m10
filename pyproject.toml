@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "company-transfers"
+version = "0.1.0"
+description = "Transfer-fee service of Company Bank SA. Training material, invented bank."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "simplejson>=3.19",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "httpx2>=2.0",
+    "behave>=1.2.6",
+    "pact-python>=2.2",
+    "pytest-playwright>=0.5",
+    "ruff>=0.5",
+    "claude-agent-sdk==0.2.170",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]
+addopts = "-ra"
+
+[tool.behave]
+paths = ["features"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "features"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]

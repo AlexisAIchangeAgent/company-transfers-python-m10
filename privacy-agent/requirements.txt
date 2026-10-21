@@ -1,0 +1,3 @@
+# Training material. Dependency of the privacy intake agent (cycle 6).
+# 22/10 (AL): pinned, the simulations of M10 ran with 0.2.168 then 0.2.170.
+claude-agent-sdk==0.2.170

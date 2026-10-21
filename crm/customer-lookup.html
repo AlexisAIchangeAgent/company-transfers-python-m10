@@ -1,0 +1,133 @@
+<!-- Training material. Invented data. -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company CRM - Customer lookup</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; margin: 0; background: #f4f5f7; color: #1d2330; }
+  .h1 { background: #22406b; color: #fff; padding: 12px 20px; font-size: 18px; }
+  .z0 { background: #fff3c4; padding: 6px 20px; font-size: 12px; }
+  .q7 { padding: 20px; max-width: 900px; }
+  .c1 { display: flex; gap: 8px; margin-bottom: 16px; }
+  .x9 { flex: 1; padding: 8px; border: 1px solid #9aa3b2; border-radius: 4px; font-size: 14px; }
+  .b2 { padding: 8px 16px; background: #22406b; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+  .k4 { list-style: none; padding: 0; margin: 0 0 20px; background: #fff; border: 1px solid #d5d9e0; }
+  .k4 > li { padding: 10px 12px; border-bottom: 1px solid #eceef2; cursor: pointer; }
+  .k4 > li:hover { background: #eef3fb; }
+  .m3 { color: #5b6475; font-size: 12px; margin-left: 8px; }
+  .t8 { width: 100%; border-collapse: collapse; background: #fff; }
+  .t8 th, .t8 td { border: 1px solid #d5d9e0; padding: 6px 10px; text-align: left; font-size: 13px; }
+  .t8 th { background: #e8ecf2; }
+  .r5 { text-align: right; }
+  .n0 { color: #5b6475; font-style: italic; }
+  .hd { display: none; }
+</style>
+</head>
+<body>
+<div class="h1">Company Bank SA - internal CRM</div>
+<div class="z0">Training material. Invented data. Invented bank.</div>
+<div class="q7">
+  <div class="c1">
+    <input class="x9" type="text" placeholder="Name or customer ID" data-testid="search-input" aria-label="Search customers">
+    <button class="b2" type="button" data-testid="search-button">Search</button>
+  </div>
+  <ul class="k4" id="u1"></ul>
+  <p class="n0 hd" id="e1">No customer found.</p>
+  <div class="hd" id="d1">
+    <h2 class="p6" id="h2"></h2>
+    <table class="t8" data-testid="transfer-history">
+      <thead>
+        <tr><th>Date</th><th>Type</th><th class="r5">Amount</th><th>Currency</th><th class="r5">Fee (MDL)</th></tr>
+      </thead>
+      <tbody id="b1"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+  // Training material. Invented data.
+  const customers = [
+    {
+      id: "C-1001", name: "Mirela Cojocaru", segment: "retail",
+      transfers: [
+        { date: "2026-10-08", type: "instant", amount: "2,000.00", currency: "MDL", fee: "20.00" },
+        { date: "2026-10-01", type: "standard", amount: "12,500.00", currency: "MDL", fee: "50.00" },
+        { date: "2026-09-15", type: "standard", amount: "300.00", currency: "EUR", fee: "29.81" }
+      ]
+    },
+    {
+      id: "C-1002", name: "Tudor Vatavu", segment: "retail",
+      transfers: [
+        { date: "2026-10-12", type: "standard", amount: "123.01", currency: "EUR", fee: "12.22" },
+        { date: "2026-10-03", type: "standard", amount: "1,500.00", currency: "MDL", fee: "7.50" },
+        { date: "2026-09-21", type: "standard", amount: "800.00", currency: "MDL", fee: "5.00" }
+      ]
+    },
+    {
+      id: "C-1003", name: "Sanda Lupascu", segment: "premium",
+      transfers: [
+        { date: "2026-10-10", type: "standard", amount: "25,000.00", currency: "MDL", fee: "50.00" },
+        { date: "2026-09-28", type: "standard", amount: "100.00", currency: "EUR", fee: "9.94" }
+      ]
+    }
+  ];
+
+  const input = document.querySelector('[data-testid="search-input"]');
+  const button = document.querySelector('[data-testid="search-button"]');
+  const list = document.getElementById("u1");
+  const empty = document.getElementById("e1");
+  const details = document.getElementById("d1");
+  const title = document.getElementById("h2");
+  const body = document.getElementById("b1");
+
+  function cell(text, cls) {
+    const td = document.createElement("td");
+    td.textContent = text;
+    if (cls) td.className = cls;
+    return td;
+  }
+
+  function showHistory(customer) {
+    title.textContent = customer.name + " (" + customer.id + ") - transfer history";
+    body.replaceChildren();
+    for (const t of customer.transfers) {
+      const tr = document.createElement("tr");
+      tr.className = "w" + t.type.length;
+      tr.setAttribute("data-testid", "transfer-row");
+      const type = cell(t.type);
+      type.setAttribute("data-testid", "transfer-type");
+      const fee = cell(t.fee, "r5");
+      fee.setAttribute("data-testid", "transfer-fee");
+      tr.append(cell(t.date), type, cell(t.amount, "r5"), cell(t.currency), fee);
+      body.append(tr);
+    }
+    details.classList.remove("hd");
+  }
+
+  function search() {
+    const query = input.value.trim().toLowerCase();
+    const found = customers.filter(
+      (c) => c.name.toLowerCase().includes(query) || c.id.toLowerCase().includes(query)
+    );
+    list.replaceChildren();
+    details.classList.add("hd");
+    empty.classList.toggle("hd", found.length > 0);
+    for (const c of found) {
+      const li = document.createElement("li");
+      li.setAttribute("data-testid", "customer-row");
+      li.textContent = c.name;
+      const meta = document.createElement("span");
+      meta.className = "m3";
+      meta.textContent = c.id + " - " + c.segment;
+      li.append(meta);
+      li.addEventListener("click", () => showHistory(c));
+      list.append(li);
+    }
+  }
+
+  button.addEventListener("click", search);
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") search(); });
+</script>
+</body>
+</html>

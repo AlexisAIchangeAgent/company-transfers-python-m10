@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-102",
+  "received_at": "2026-10-13T11:40:00+03:00",
+  "channel": "branch",
+  "requester": {
+    "name": "Mirela Cojocaru",
+    "email": "mirela.cojocaru@example.invalid",
+    "customer_id": "C-1001"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "identity check in branch Chisinau-Centru"
+  },
+  "request_type": "access",
+  "message": "I came to the branch to ask for a copy of the data you hold on me, including the people I sent money to this year."
+}

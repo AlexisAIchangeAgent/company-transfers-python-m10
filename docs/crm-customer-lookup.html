@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>CRM customer lookup page: what it does</title>
+<style>
+  body { font-family: "Segoe UI", Arial, sans-serif; line-height: 1.5; max-width: 62rem; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+  h1, h2, h3 { line-height: 1.25; }
+  h2 { margin-top: 2.5rem; border-bottom: 1px solid #ccc; padding-bottom: .25rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .95rem; }
+  th, td { border: 1px solid #bbb; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; }
+  code, pre { font-family: Consolas, "Courier New", monospace; font-size: .9rem; }
+  pre { background: #f6f6f6; border: 1px solid #ddd; padding: .75rem; overflow-x: auto; }
+  .src { color: #555; font-size: .85rem; }
+  .tag { font-weight: bold; font-size: .8rem; padding: 0 .35rem; border: 1px solid; }
+  .assume { color: #8a5a00; }
+  .missing { color: #a30000; }
+  .note { border-left: 4px solid #888; padding: .25rem .75rem; background: #fafafa; }
+</style>
+</head>
+<body>
+
+<h1>CRM customer lookup page: what it does</h1>
+<p class="note">Training material. Company Bank SA, its customers and its figures are invented
+<span class="src">(crm/customer-lookup.html:1,30)</span>.</p>
+
+<p>The page <code>crm/customer-lookup.html</code> is a static page of the internal CRM
+<span class="src">(README.md:201; CLAUDE.md:39)</span>. A user types a name or a customer ID, picks a customer,
+and reads the transfer history of that customer. This page is for a developer who must test or change it.
+Every statement cites a file and a line; paths are relative to the repository root.
+<span class="tag assume">ASSUMPTION</span> marks something that is not verified from the repository.
+<span class="tag missing">MISSING</span> marks information the repository does not contain. Both lists are repeated in section 7.</p>
+
+<p><strong>Important:</strong> the page is not a client of the fee service. It has no <code>fetch</code>, no
+<code>XMLHttpRequest</code> and no URL (searched in crm/customer-lookup.html; the script is inline, lines 48-131). The
+customers, the transfers and every fee are typed in the file (lines 50-74). A change of fee rule in
+<code>src/company_transfers/domain/fees.py</code> does not change what this page shows.</p>
+
+<p>Diagram: not produced, as requested.</p>
+
+<h2>1. Components</h2>
+<table>
+<tr><th>Component</th><th>Lines in crm/customer-lookup.html</th><th>Role</th></tr>
+<tr><td>Banner</td><td>29-30</td><td>Title "Company Bank SA - internal CRM" and the notice "Training material. Invented data. Invented bank."</td></tr>
+<tr><td>Search form</td><td>32-35</td><td>Text input (<code>data-testid="search-input"</code>) and button (<code>data-testid="search-button"</code>).</td></tr>
+<tr><td>Result list</td><td>36-37</td><td><code>ul#u1</code>, one <code>li</code> per customer found; <code>p#e1</code> "No customer found."</td></tr>
+<tr><td>History panel</td><td>38-46</td><td>Title <code>h2#h2</code> and a table with columns Date, Type, Amount, Currency, Fee (MDL).</td></tr>
+<tr><td>Data</td><td>50-74</td><td>Constant <code>customers</code>: 3 customers, 8 transfers.</td></tr>
+<tr><td><code>cell()</code></td><td>84-89</td><td>Creates a <code>td</code> with text and an optional class.</td></tr>
+<tr><td><code>showHistory()</code></td><td>91-106</td><td>Fills the history table for one customer and shows the panel.</td></tr>
+<tr><td><code>search()</code></td><td>108-127</td><td>Filters the customers and builds the result list.</td></tr>
+<tr><td>Event wiring</td><td>129-130</td><td>Click on the button, and the Enter key in the input, both call <code>search()</code>.</td></tr>
+</table>
+
+<h2>2. Interfaces</h2>
+<h3>2.1 Endpoints</h3>
+<p>None. The page serves nothing and calls nothing. The fee service has its own endpoints
+(<code>GET /health</code>, <code>POST /fees</code>: api/routes.py:22,27) and <code>src/company_transfers/main.py</code> mounts no static
+files and no <code>crm/</code> route (main.py:26-39). The page is therefore not served by the service.</p>
+
+<h3>2.2 Hooks for tests</h3>
+<table>
+<tr><th><code>data-testid</code></th><th>Element</th><th>Line</th></tr>
+<tr><td><code>search-input</code></td><td>text input, placeholder "Name or customer ID"</td><td>33</td></tr>
+<tr><td><code>search-button</code></td><td>button "Search"</td><td>34</td></tr>
+<tr><td><code>customer-row</code></td><td>one <code>li</code> per customer found (text: the name; a span holds "ID - segment")</td><td>118-123</td></tr>
+<tr><td><code>transfer-history</code></td><td>history table</td><td>40</td></tr>
+<tr><td><code>transfer-row</code></td><td>one <code>tr</code> per transfer</td><td>97</td></tr>
+<tr><td><code>transfer-type</code></td><td>cell "standard" or "instant"</td><td>99</td></tr>
+<tr><td><code>transfer-fee</code></td><td>fee cell, text such as <code>20.00</code></td><td>101</td></tr>
+</table>
+<p>The CSS class names (<code>.h1</code>, <code>.q7</code>, <code>.k4</code> and so on, lines 9-25) carry no meaning; use the
+<code>data-testid</code> values. No test in <code>tests/</code>, <code>features/</code> or <code>privacy-agent/</code> uses them
+(searched for <code>testid</code> and <code>customer-lookup</code>). <span class="tag missing">MISSING</span> a Playwright test of this page: Playwright tests are
+not in the repository (README.md:189).</p>
+
+<h2>3. What the page does</h2>
+<ul>
+<li>Search: the query is trimmed and lower-cased, and a customer matches if the name or the ID contains it, in any case
+(crm/customer-lookup.html:109-112). An empty query matches the three customers.</li>
+<li>Each search clears the list and hides the history panel (lines 113-114). "No customer found." is shown when nothing matches (line 115).</li>
+<li>A click on a customer row shows the history of that customer, in the order of the array, which is newest first in the data (lines 91-106, 54-71).</li>
+<li>The history title is "&lt;name&gt; (&lt;ID&gt;) - transfer history" (line 92). The result list also shows the segment (line 122); the history does not.</li>
+<li>Amounts and fees are text. Amounts have thousands separators, for example <code>2,000.00</code> (line 54); fees have two decimals (lines 54-71).</li>
+<li>Rows of the list are <code>li</code> elements with a click handler and no <code>tabindex</code> (lines 117-125): a click opens a history, the keyboard does not. <span class="tag assume">ASSUMPTION</span> a browser gives no keyboard focus to such an element; not tested here.</li>
+<li>Each history row gets the class <code>"w" + t.type.length</code> (line 96), so <code>w8</code> for standard and <code>w7</code> for instant. No CSS rule uses it (lines 9-25). <span class="tag missing">MISSING</span> the purpose of these classes.</li>
+</ul>
+
+<h2>4. Data in the page, and the fee service</h2>
+<p>The fee column is typed text. The last column below is what <code>domain/fees.py</code> gives, computed by hand, not by running the
+code. For EUR rows, the rate is 19.8765, the default of <code>FixedRateClient</code> (clients/exchange_rate.py:67) and the rate quoted in
+incidents/INC-2026-0412.md for C-1002.</p>
+<table>
+<tr><th>Customer</th><th>Date</th><th>Type</th><th>Amount</th><th>Fee in the page (line)</th><th>Fee by <code>domain/fees.py</code>, derived</th></tr>
+<tr><td>C-1001 Mirela Cojocaru, retail</td><td>2026-10-08</td><td>instant</td><td>MDL 2,000.00</td><td>20.00 (54)</td><td>10.00 + 10.00 = 20.00 (fees.py:34,59; features/instant-fee.feature:24)</td></tr>
+<tr><td>C-1001</td><td>2026-10-01</td><td>standard</td><td>MDL 12,500.00</td><td>50.00 (55)</td><td>62.50, capped at 50.00 (fees.py:19,25)</td></tr>
+<tr><td>C-1001</td><td>2026-09-15</td><td>standard</td><td>EUR 300.00</td><td>29.81 (56)</td><td>5962.95 MDL, 29.81475, rounds to 29.81 half even and half up</td></tr>
+<tr><td>C-1002 Tudor Vatavu, retail</td><td>2026-10-12</td><td>standard</td><td>EUR 123.01</td><td>12.22 (62)</td><td>2445.00 MDL (truncated, fees.py:64), 12.225, half even gives 12.22 (fees.py:53). The tariff gives 12.23 (docs/fee-rules.md:16-17)</td></tr>
+<tr><td>C-1002</td><td>2026-10-03</td><td>standard</td><td>MDL 1,500.00</td><td>7.50 (63)</td><td>7.50</td></tr>
+<tr><td>C-1002</td><td>2026-09-21</td><td>standard</td><td>MDL 800.00</td><td>5.00 (64)</td><td>4.00, raised to the minimum 5.00 (fees.py:18)</td></tr>
+<tr><td>C-1003 Sanda Lupascu, premium</td><td>2026-10-10</td><td>standard</td><td>MDL 25,000.00</td><td>50.00 (70)</td><td>125.00, capped at 50.00</td></tr>
+<tr><td>C-1003</td><td>2026-09-28</td><td>standard</td><td>EUR 100.00</td><td>9.94 (71)</td><td>1987.65 MDL, 9.93825, rounds to 9.94</td></tr>
+</table>
+<p>Seven of the eight fees equal the service value. The row of C-1002 on 2026-10-12 shows the value of the code, which differs from the
+published tariff by MDL 0.01. This is the dispute of incidents/INC-2026-0412.md (line 29 quotes this fee as "visible in the CRM"); it is open
+and this page does not settle it (README.md:165-167). <span class="tag missing">MISSING</span> the decision on the correct EUR rounding
+(CLAUDE.md, section 3).</p>
+<p><span class="tag assume">ASSUMPTION</span> the rate behind each EUR row is 19.8765. The page does not state a rate or a date of rate.</p>
+<p>No IBAN is shown and the customer data has no IBAN field (lines 50-74), although <code>mask_iban</code> in
+<code>src/company_transfers/domain/iban.py</code> is documented as "for the CRM screen" (iban.py:1; commit <code>3941c53</code>).
+<span class="tag missing">MISSING</span> the place where <code>mask_iban</code> is meant to be used.</p>
+
+<h2>5. Dependencies</h2>
+<ul>
+<li>No package, no external script, no stylesheet link, no web font, no image: styles are inline (lines 8-26) and so is the script (lines 48-131).</li>
+<li>No network call, and no storage (searched for <code>fetch</code>, <code>XMLHttpRequest</code>, <code>localStorage</code> and <code>http</code>: no match).</li>
+<li>Browser: the script uses <code>replaceChildren</code> (lines 93, 113), <code>const</code>, arrow functions and <code>for...of</code>. <span class="tag assume">ASSUMPTION</span> a current browser runs it; the supported browsers are not stated and I did not open the page.</li>
+<li>The Python <code>pyproject.toml</code> does not mention the page, and no command of the project builds or serves it (Makefile:7; run-local.ps1:13).</li>
+</ul>
+
+<h2>6. Open and test it</h2>
+<p>The repository has no command to open the page. <span class="tag missing">MISSING</span> a documented way to open it. The service does not serve
+it (section 2.1). I did not open it. Run from the repository root. Opening the file directly in a browser should work because the page has
+no network call. <span class="tag assume">ASSUMPTION</span>: the commands below are not from the repository and were not run.</p>
+<p>Windows PowerShell:</p>
+<pre>Start-Process .\crm\customer-lookup.html</pre>
+<p>macOS Terminal:</p>
+<pre>open crm/customer-lookup.html</pre>
+<p>Try: type <code>C-1002</code> or <code>Tudor</code>, press Enter or click Search, then click the customer row. The history of C-1002 has three rows and
+the first one has fee <code>12.22</code> (lines 60-65). Type <code>zzz</code> to see "No customer found.".</p>
+<p>Automated checks: none cover the page. The project checks, run from the repository root, are unrelated to it. They run the service and the lint,
+and the lint configuration (<code>pyproject.toml:38-44</code>) does not include HTML. Windows PowerShell and macOS Terminal forms:</p>
+<pre># Windows PowerShell
+.venv\Scripts\python -m pytest
+.venv\Scripts\python -m behave
+
+# macOS Terminal
+.venv/bin/python -m pytest
+.venv/bin/python -m behave</pre>
+
+<h2>7. Assumptions and missing information</h2>
+<h3>Assumptions</h3>
+<ul>
+<li><span class="tag assume">ASSUMPTION</span> the rate behind each EUR row of the page is 19.8765.</li>
+<li><span class="tag assume">ASSUMPTION</span> the fee values in section 4 are right: they were derived by hand from <code>domain/fees.py</code>, not by running it.</li>
+<li><span class="tag assume">ASSUMPTION</span> a browser gives no keyboard focus to the customer rows (no <code>tabindex</code>); not tested.</li>
+<li><span class="tag assume">ASSUMPTION</span> a current browser runs the script; none was opened.</li>
+<li><span class="tag assume">ASSUMPTION</span> opening the file directly works, with the commands of section 6; they are not from the repository and were not run.</li>
+</ul>
+<h3>Missing</h3>
+<ul>
+<li><span class="tag missing">MISSING</span> a link between the page and the fee service: the fees are typed text, and nothing keeps them equal to the service.</li>
+<li><span class="tag missing">MISSING</span> the correct EUR rounding, which decides whether the C-1002 row should show 12.22 or 12.23.</li>
+<li><span class="tag missing">MISSING</span> the place where <code>mask_iban</code> is used.</li>
+<li><span class="tag missing">MISSING</span> a Playwright test of the page, and any test of it.</li>
+<li><span class="tag missing">MISSING</span> the purpose of the row class <code>w7</code>/<code>w8</code> (line 96).</li>
+<li><span class="tag missing">MISSING</span> a documented way to open or serve the page, and the list of supported browsers.</li>
+<li><span class="tag missing">MISSING</span> the source of the customer data, and a statement of whether the page is a prototype or meant to read real data. No file says.</li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "maib-claude-plugins-python",
+  "owner": { "name": "Company transfers team (training)" },
+  "plugins": [
+    {
+      "name": "maib-training-python-contract",
+      "source": "./plugins/maib-training-python-contract",
+      "description": "Working contract of the Company transfers service (Python), with a skill to apply it to a new repository."
+    },
+    {
+      "name": "maib-training-docs",
+      "source": "./plugins/maib-training-docs",
+      "description": "Skill component-docs: document the components, endpoints and dependencies of a service from its repository (HTML page, SVG diagram, ASSUMPTION and MISSING lists)."
+    }
+  ]
+}

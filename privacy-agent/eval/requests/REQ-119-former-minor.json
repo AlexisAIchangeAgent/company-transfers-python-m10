@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-119",
+  "received_at": "2026-10-19T10:00:00+03:00",
+  "channel": "mobile app",
+  "requester": {
+    "name": "Cristina Melnic",
+    "email": "cristina.melnic@example.invalid",
+    "customer_id": "C-1611"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated mobile app session"
+  },
+  "request_type": "erasure",
+  "message": "I am 19 now. I had a junior card with you from age 14 to 17. Please delete the data you collected about me at that time, if you no longer need it."
+}

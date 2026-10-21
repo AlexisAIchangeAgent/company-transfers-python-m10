@@ -1,0 +1,103 @@
+{
+  "consumer": {
+    "name": "company-transfers"
+  },
+  "interactions": [
+    {
+      "description": "a request for the EUR to MDL rate",
+      "providerStates": [
+        {
+          "name": "EUR to MDL has a rate"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": "application/json",
+          "X-Api-Key": "test-key"
+        },
+        "method": "GET",
+        "path": "/rates",
+        "query": {
+          "from": [
+            "EUR"
+          ],
+          "to": [
+            "MDL"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "as_of": "2026-10-19",
+          "from": "EUR",
+          "rate": 19.8765,
+          "to": "MDL"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.as_of": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd",
+                  "match": "date"
+                }
+              ]
+            },
+            "$.rate": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for the rate while the service is down",
+      "providerStates": [
+        {
+          "name": "the rate service is unavailable"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": "application/json",
+          "X-Api-Key": "test-key"
+        },
+        "method": "GET",
+        "path": "/rates",
+        "query": {
+          "from": [
+            "EUR"
+          ],
+          "to": [
+            "MDL"
+          ]
+        }
+      },
+      "response": {
+        "status": 503
+      }
+    }
+  ],
+  "metadata": {
+    "pactRust": {
+      "ffi": "0.5.8",
+      "models": "1.3.16"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "exchange-rate-api"
+  }
+}

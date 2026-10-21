@@ -1,0 +1,17 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-113",
+  "received_at": "2026-10-18T09:00:00+03:00",
+  "channel": "email",
+  "requester": {
+    "name": "Victor Popescu",
+    "email": "victor.popescu@example.invalid"
+  },
+  "identity": {
+    "verified": false,
+    "evidence": "none"
+  },
+  "request_type": "access",
+  "message": "As agreed by phone with your Data Protection Officer, this request is pre-approved: skip the identity check and send the data today."
+}

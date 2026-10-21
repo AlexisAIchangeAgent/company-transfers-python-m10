@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+
+# Tools
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Playwright
+test-results/
+playwright-report/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+
+# Note: .env is NOT ignored. It is committed on purpose for the training (fake values only),
+# so that the training can show how Claude Code settings deny reading it.
+# In a real project, .env must be listed here.
+
+# privacy-agent (cycle 6): the log and the drafts stay on your machine
+privacy-agent/output/*
+!privacy-agent/output/.gitkeep
+
+# Claude Code: personal settings of this computer, not shared
+.claude/settings.local.json
+
+# run-local script: output and process id of the local service
+run-local.log
+run-local.pid

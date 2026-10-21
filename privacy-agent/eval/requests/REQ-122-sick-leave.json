@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-122",
+  "received_at": "2026-10-19T15:05:00+03:00",
+  "channel": "web banking",
+  "requester": {
+    "name": "Pavel Rotaru",
+    "email": "pavel.rotaru@example.invalid",
+    "customer_id": "C-1310"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated web banking session"
+  },
+  "request_type": "erasure",
+  "message": "Last spring I sent you my sick-leave certificates to explain a late loan payment. The payment is settled now. Please delete those certificates."
+}

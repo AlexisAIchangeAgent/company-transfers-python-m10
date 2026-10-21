@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "zsh \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-protected-files.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "zsh \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-destructive-git.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "zsh \"$CLAUDE_PROJECT_DIR/.claude/hooks/run-unit-tests.sh\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

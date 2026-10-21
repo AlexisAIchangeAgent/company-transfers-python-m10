@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-002",
+  "received_at": "2026-10-06T14:02:00+03:00",
+  "channel": "web banking",
+  "requester": {
+    "name": "Victor Ceban",
+    "email": "victor.ceban@example.invalid",
+    "customer_id": "C-1047"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated web banking session"
+  },
+  "request_type": "erasure",
+  "message": "I closed my savings account in July. Please delete the personal data you do not need to keep anymore."
+}

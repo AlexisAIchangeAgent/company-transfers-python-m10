@@ -1,0 +1,14 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-004",
+  "received_at": "2026-10-08T22:47:00+03:00",
+  "channel": "email",
+  "requester": {
+    "name": "Doina Rusnac",
+    "email": "doina.r@example.invalid"
+  },
+  "identity": null,
+  "request_type": "access",
+  "message": "Send me everything you have on me. I am a customer, you can find me by my name."
+}

@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-006",
+  "received_at": "2026-10-10T16:20:00+03:00",
+  "channel": "web banking",
+  "requester": {
+    "name": "Grigore Moraru",
+    "email": "grigore.moraru@example.invalid",
+    "customer_id": "C-1088"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated web banking session"
+  },
+  "request_type": "erasure",
+  "message": "When I asked for a loan I sent you medical certificates about my treatment. I want these health documents deleted from your systems."
+}

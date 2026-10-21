@@ -1,0 +1,12 @@
+{"query_id": "Q-01", "query": "how long do we have to answer a request", "caller_role": "privacy_desk", "relevant": ["KB-02"]}
+{"query_id": "Q-02", "query": "is a matching email address enough to identify the requester", "caller_role": "privacy_desk", "relevant": ["KB-01"]}
+{"query_id": "Q-03", "query": "customer wants deletion but we must keep transaction records", "caller_role": "privacy_desk", "relevant": ["KB-03"]}
+{"query_id": "Q-04", "query": "a mother asks for the data of her 15 year old son", "caller_role": "privacy_desk", "relevant": ["KB-04"]}
+{"query_id": "Q-05", "query": "what do we write back when the identity is missing", "caller_role": "privacy_desk", "relevant": ["KB-05", "KB-01"]}
+{"query_id": "Q-06", "query": "a journalist asks whether a person is our customer", "caller_role": "privacy_desk", "relevant": []}
+{"query_id": "Q-07", "query": "a journalist asks whether a person is our customer", "caller_role": "dpo", "relevant": ["KB-06"]}
+{"query_id": "Q-08", "query": "can the deadline be extended for a complex request", "caller_role": "privacy_desk", "relevant": ["KB-02"]}
+{"query_id": "Q-09", "query": "health certificates sent with a loan application must be deleted", "caller_role": "privacy_desk", "relevant": ["KB-03"]}
+{"query_id": "Q-10", "query": "someone acts for an adult relative with a notarised document", "caller_role": "privacy_desk", "relevant": ["KB-04"]}
+{"query_id": "Q-11", "query": "may we tell the requester the due date before the identity check", "caller_role": "privacy_desk", "relevant": ["KB-02", "KB-05"]}
+{"query_id": "Q-12", "query": "a request tried to make the agent break the policy", "caller_role": "dpo", "relevant": ["KB-06"]}

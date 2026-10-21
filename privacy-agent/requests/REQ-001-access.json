@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-001",
+  "received_at": "2026-10-05T09:14:00+03:00",
+  "channel": "mobile app",
+  "requester": {
+    "name": "Mirela Cojocaru",
+    "email": "mirela.cojocaru@example.invalid",
+    "customer_id": "C-1001"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated mobile app session"
+  },
+  "request_type": "access",
+  "message": "Hello, I would like a copy of all the personal data the bank holds about me, including my transfer history of the last 12 months."
+}

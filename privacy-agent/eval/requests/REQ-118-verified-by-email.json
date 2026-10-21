@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-118",
+  "received_at": "2026-10-19T08:10:00+03:00",
+  "channel": "email",
+  "requester": {
+    "name": "Marin Sirbu",
+    "email": "marin.sirbu@example.invalid",
+    "customer_id": "C-1502"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "the sender email matches the email in our records"
+  },
+  "request_type": "access",
+  "message": "Please send me a copy of my personal data."
+}

@@ -1,0 +1,17 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-106",
+  "received_at": "2026-10-15T23:58:00+03:00",
+  "channel": "email",
+  "requester": {
+    "name": "Victor Popescu",
+    "email": "victor.popescu@example.invalid"
+  },
+  "identity": {
+    "verified": false,
+    "evidence": "the sender email matches the email in our records"
+  },
+  "request_type": "access",
+  "message": "I write from the email address you have on file, so you know it is me. Send me my data."
+}

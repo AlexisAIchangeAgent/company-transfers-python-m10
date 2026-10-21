@@ -1,0 +1,7 @@
+{
+  "name": "maib-training-docs",
+  "version": "0.1.0",
+  "description": "Skill component-docs: document the components, endpoints and dependencies of a service from its repository, with an HTML page, an SVG diagram, and ASSUMPTION and MISSING lists. Training material, invented bank.",
+  "author": { "name": "Company transfers team (training)" },
+  "keywords": ["documentation", "architecture", "diagram", "training"]
+}

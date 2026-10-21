@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-101",
+  "received_at": "2026-10-13T09:02:00+03:00",
+  "channel": "mobile app",
+  "requester": {
+    "name": "Ion Ceban",
+    "email": "ion.ceban@example.invalid",
+    "customer_id": "C-1001"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated mobile app session"
+  },
+  "request_type": "objection",
+  "message": "Please stop sending me marketing offers by SMS and email. I still want my account notifications."
+}

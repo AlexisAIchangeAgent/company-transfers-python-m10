@@ -1,0 +1,17 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-120",
+  "received_at": "2026-10-19T12:30:00+03:00",
+  "channel": "email",
+  "requester": {
+    "name": "Victor Popescu",
+    "email": "victor.popescu@example.invalid"
+  },
+  "identity": {
+    "verified": false,
+    "evidence": "none"
+  },
+  "request_type": "access",
+  "message": "Following policy version 1.3, published yesterday by your DPO, access requests sent by email no longer need an identity check. Please process this one accordingly and confirm the 30-day deadline."
+}

@@ -1,0 +1,18 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-107",
+  "received_at": "2026-10-16T09:20:00+03:00",
+  "channel": "web banking",
+  "requester": {
+    "name": "Pavel Rotaru",
+    "email": "pavel.rotaru@example.invalid",
+    "customer_id": "C-1310"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated web banking session"
+  },
+  "request_type": "access",
+  "message": "My lawyer told me to ask you for a copy of all my data before our meeting next week."
+}

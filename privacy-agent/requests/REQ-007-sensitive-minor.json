@@ -1,0 +1,23 @@
+{
+  "_note": "Training material. Invented data.",
+  "synthetic": true,
+  "id": "REQ-007",
+  "received_at": "2026-10-11T10:10:00+03:00",
+  "channel": "email",
+  "requester": {
+    "name": "Elena Botnari",
+    "email": "elena.botnari@example.invalid",
+    "customer_id": "C-1112"
+  },
+  "identity": {
+    "verified": true,
+    "evidence": "authenticated web banking session, then email follow-up"
+  },
+  "request_type": "access",
+  "on_behalf_of": {
+    "name": "Matei Botnari",
+    "relationship": "son",
+    "age": 15
+  },
+  "message": "I am the mother of Matei, 15 years old, who has a junior card with you. I want to see all the data you have about my son."
+}

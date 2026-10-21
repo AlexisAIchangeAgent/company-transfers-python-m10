@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transfer-fee service: how to call it</title>
+<style>
+  body { font-family: "Segoe UI", Arial, sans-serif; line-height: 1.5; max-width: 62rem; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+  h1, h2, h3 { line-height: 1.25; }
+  h2 { margin-top: 2.5rem; border-bottom: 1px solid #ccc; padding-bottom: .25rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .95rem; }
+  th, td { border: 1px solid #bbb; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; }
+  code, pre { font-family: Consolas, "Courier New", monospace; font-size: .9rem; }
+  pre { background: #f6f6f6; border: 1px solid #ddd; padding: .75rem; overflow-x: auto; }
+  .src { color: #555; font-size: .85rem; }
+  .tag { font-weight: bold; font-size: .8rem; padding: 0 .35rem; border: 1px solid; }
+  .assume { color: #8a5a00; }
+  .missing { color: #a30000; }
+  .note { border-left: 4px solid #888; padding: .25rem .75rem; background: #fafafa; }
+  svg { max-width: 100%; height: auto; border: 1px solid #ddd; }
+</style>
+</head>
+<body>
+
+<h1>Transfer-fee service: how to call it</h1>
+<p class="note">Training material. Company Bank SA, its customers and its figures are invented
+<span class="src">(README.md:3)</span>.</p>
+
+<p>The service computes the fee of a customer transfer before the customer confirms it
+<span class="src">(README.md:5)</span>. Every statement below cites the file and line it comes from.
+Paths are relative to the repository root. <span class="tag assume">ASSUMPTION</span> marks something
+that is not verified from the repository. <span class="tag missing">MISSING</span> marks information
+the repository does not contain. The lists are repeated in section 8.</p>
+
+<p>Not used as a source: <code>docs/README-service.md</code>. It is out of date
+<span class="src">(README.md:168-170)</span>: it lists <code>GET /fees/{id}</code>, a maximum fee of 40.00 and bankers
+rounding, and none of this is in the code.</p>
+
+<h2>1. Components</h2>
+<table>
+<tr><th>Component</th><th>File</th><th>Role</th><th>Depends on</th></tr>
+<tr><td>App factory</td><td><code>src/company_transfers/main.py:26,42</code></td>
+  <td>Builds the FastAPI app (<code>create_app</code>), exposes <code>app</code> for uvicorn, maps errors to HTTP (<code>:31-37</code>).</td>
+  <td>api, domain, clients, config</td></tr>
+<tr><td>Rate-client choice</td><td><code>main.py:17-23</code></td>
+  <td><code>HttpExchangeRateClient</code> when <code>RATES_BASE_URL</code> is set, otherwise <code>FixedRateClient</code>.</td>
+  <td>config, clients</td></tr>
+<tr><td>Configuration</td><td><code>src/company_transfers/config.py:7-19</code></td>
+  <td>Reads three environment variables, see section 5.</td><td>environment</td></tr>
+<tr><td>HTTP routes</td><td><code>src/company_transfers/api/routes.py:19-43</code></td>
+  <td><code>GET /health</code> and <code>POST /fees</code>.</td><td>schemas, domain</td></tr>
+<tr><td>Request and response bodies</td><td><code>src/company_transfers/api/schemas.py:11-32</code></td>
+  <td>Validation of the request. <code>DecimalJSONResponse</code> writes the fee as a JSON number, not a string.</td><td>pydantic, simplejson</td></tr>
+<tr><td>Fee rules</td><td><code>src/company_transfers/domain/fees.py:38-64</code></td>
+  <td><code>FeeCalculator</code>: standard fee, instant fee, instant limit.</td><td>models, the <code>ExchangeRateClient</code> protocol (<code>fees.py:5</code>)</td></tr>
+<tr><td>Domain types</td><td><code>src/company_transfers/domain/models.py:21-52</code></td>
+  <td>Enums, <code>FeeRequest</code>, <code>Fee</code>, <code>UnsupportedTransferError</code>.</td><td>none</td></tr>
+<tr><td>IBAN masking</td><td><code>src/company_transfers/domain/iban.py:6-10</code></td>
+  <td><code>mask_iban</code>. Not reachable through HTTP: no route calls it (<code>api/routes.py</code>), and only <code>tests/unit/test_iban_mask.py</code> references it.</td><td>none</td></tr>
+<tr><td>Rate clients</td><td><code>src/company_transfers/clients/exchange_rate.py:30-71</code></td>
+  <td>Protocol <code>ExchangeRateClient</code>; <code>HttpExchangeRateClient</code> (urllib); <code>FixedRateClient</code> (rate 19.8765, no network).</td>
+  <td>the exchange-rate provider, for the HTTP client only</td></tr>
+</table>
+<p>Dependency direction: <code>api -&gt; domain -&gt; clients</code>, and <code>main.py</code> wires the three
+<span class="src">(CLAUDE.md, "Architecture boundaries"; imports at api/routes.py:11 and domain/fees.py:5)</span>.</p>
+
+<h2>2. Architecture diagram</h2>
+<p>The diagram shows only modules, calls and the external provider that appear in the code. The same
+diagram is in <code>docs/transfer-service.svg</code>.</p>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" width="1000" height="650" role="img" aria-labelledby="t d" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <title id="t">Architecture of the transfer-fee service</title>
+  <desc id="d">Modules of src/company_transfers and the calls between them, as read in the code. main.py wires api, domain and clients. Only HttpExchangeRateClient calls the external exchange-rate provider.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+  </defs>
+
+  <!-- outside the repository -->
+  <rect x="330" y="15" width="260" height="44" fill="#fff" stroke="#333" stroke-dasharray="6 4"/>
+  <text x="460" y="35" text-anchor="middle">HTTP caller (outside this repository)</text>
+  <text x="460" y="51" text-anchor="middle" font-size="11">your service</text>
+  <line x1="460" y1="59" x2="460" y2="120" stroke="#333" marker-end="url(#arrow)"/>
+  <text x="470" y="84" font-size="12">POST /fees, GET /health</text>
+
+  <!-- app column -->
+  <text x="20" y="90" font-weight="bold">app (wiring)</text>
+  <rect x="20" y="100" width="240" height="120" fill="#f4f4f4" stroke="#333"/>
+  <text x="30" y="120" font-weight="bold">main.py</text>
+  <text x="30" y="140" font-size="12">create_app(), app</text>
+  <text x="30" y="157" font-size="12">build_rate_client()</text>
+  <text x="30" y="174" font-size="12">error handlers: 422, 502</text>
+  <text x="30" y="191" font-size="12">include_router, FeeCalculator</text>
+  <text x="30" y="208" font-size="12">(wiring: dashed arrows)</text>
+
+  <rect x="20" y="260" width="240" height="60" fill="#f4f4f4" stroke="#333"/>
+  <text x="30" y="280" font-weight="bold">config.py</text>
+  <text x="30" y="298" font-size="12">Settings.from_env()</text>
+  <text x="30" y="313" font-size="12">RATES_* environment variables</text>
+  <line x1="140" y1="220" x2="140" y2="260" stroke="#333" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+
+  <!-- api layer -->
+  <rect x="300" y="95" width="680" height="100" fill="none" stroke="#888"/>
+  <text x="970" y="111" text-anchor="end" font-size="12" fill="#555">api/</text>
+  <rect x="320" y="120" width="300" height="60" fill="#fff" stroke="#333"/>
+  <text x="330" y="140" font-weight="bold">routes.py</text>
+  <text x="330" y="158" font-size="12">GET /health</text>
+  <text x="330" y="173" font-size="12">POST /fees</text>
+  <rect x="670" y="120" width="290" height="60" fill="#fff" stroke="#333"/>
+  <text x="680" y="140" font-weight="bold">schemas.py</text>
+  <text x="680" y="158" font-size="12">FeeRequestBody, FeeResponseBody,</text>
+  <text x="680" y="173" font-size="12">ErrorBody, DecimalJSONResponse</text>
+  <line x1="620" y1="150" x2="670" y2="150" stroke="#333" marker-end="url(#arrow)"/>
+
+  <!-- domain layer -->
+  <rect x="300" y="235" width="680" height="100" fill="none" stroke="#888"/>
+  <text x="970" y="251" text-anchor="end" font-size="12" fill="#555">domain/</text>
+  <rect x="320" y="260" width="210" height="60" fill="#fff" stroke="#333"/>
+  <text x="330" y="280" font-weight="bold">fees.py</text>
+  <text x="330" y="298" font-size="12">FeeCalculator.calculate()</text>
+  <text x="330" y="313" font-size="12">standard and instant rules</text>
+  <rect x="560" y="260" width="190" height="60" fill="#fff" stroke="#333"/>
+  <text x="570" y="280" font-weight="bold">models.py</text>
+  <text x="570" y="298" font-size="12">enums, FeeRequest, Fee,</text>
+  <text x="570" y="313" font-size="12">UnsupportedTransferError</text>
+  <rect x="780" y="260" width="180" height="60" fill="#fff" stroke="#333" stroke-dasharray="6 4"/>
+  <text x="790" y="280" font-weight="bold">iban.py</text>
+  <text x="790" y="298" font-size="12">mask_iban()</text>
+  <text x="790" y="313" font-size="12">no caller in src/</text>
+  <line x1="530" y1="290" x2="560" y2="290" stroke="#333" marker-end="url(#arrow)"/>
+  <line x1="420" y1="180" x2="420" y2="260" stroke="#333" marker-end="url(#arrow)"/>
+  <text x="430" y="224" font-size="12">calculate()</text>
+
+  <!-- clients layer -->
+  <rect x="300" y="375" width="680" height="130" fill="none" stroke="#888"/>
+  <text x="970" y="391" text-anchor="end" font-size="12" fill="#555">clients/exchange_rate.py</text>
+  <rect x="320" y="400" width="200" height="90" fill="#fff" stroke="#333"/>
+  <text x="330" y="420" font-weight="bold">ExchangeRateClient</text>
+  <text x="330" y="438" font-size="12">Protocol: get_rate()</text>
+  <text x="330" y="453" font-size="12">the only name domain/</text>
+  <text x="330" y="468" font-size="12">imports from clients/</text>
+  <rect x="550" y="400" width="200" height="90" fill="#fff" stroke="#333"/>
+  <text x="560" y="420" font-weight="bold">HttpExchangeRateClient</text>
+  <text x="560" y="438" font-size="12">urllib call, timeout,</text>
+  <text x="560" y="453" font-size="12">X-Api-Key if set</text>
+  <text x="560" y="468" font-size="12">used if RATES_BASE_URL set</text>
+  <rect x="780" y="400" width="180" height="90" fill="#fff" stroke="#333"/>
+  <text x="790" y="420" font-weight="bold">FixedRateClient</text>
+  <text x="790" y="438" font-size="12">rate 19.8765, no network</text>
+  <text x="790" y="453" font-size="12">used if RATES_BASE_URL</text>
+  <text x="790" y="468" font-size="12">is not set</text>
+  <line x1="420" y1="320" x2="420" y2="400" stroke="#333" marker-end="url(#arrow)"/>
+  <text x="430" y="364" font-size="12">get_rate() (EUR amounts only)</text>
+
+  <!-- external -->
+  <rect x="520" y="560" width="260" height="50" fill="#fff" stroke="#333" stroke-dasharray="6 4"/>
+  <text x="650" y="581" text-anchor="middle">Exchange-rate provider (third party)</text>
+  <text x="650" y="597" text-anchor="middle" font-size="11">outside this repository</text>
+  <line x1="650" y1="490" x2="650" y2="560" stroke="#333" marker-end="url(#arrow)"/>
+  <text x="660" y="530" font-size="12">GET /rates?from=EUR&amp;to=MDL</text>
+
+  <!-- wiring arrows from main.py -->
+  <line x1="260" y1="130" x2="320" y2="145" stroke="#333" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+  <line x1="260" y1="190" x2="320" y2="280" stroke="#333" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+  <line x1="260" y1="215" x2="300" y2="440" stroke="#333" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+
+  <!-- legend -->
+  <text x="20" y="530" font-weight="bold" font-size="12">Legend</text>
+  <line x1="20" y1="545" x2="70" y2="545" stroke="#333" marker-end="url(#arrow)"/>
+  <text x="80" y="549" font-size="12">call or import</text>
+  <line x1="20" y1="565" x2="70" y2="565" stroke="#333" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+  <text x="80" y="569" font-size="12">built or wired in main.py</text>
+  <rect x="20" y="578" width="50" height="14" fill="#fff" stroke="#333" stroke-dasharray="6 4"/>
+  <text x="80" y="590" font-size="12">outside the service, or not called</text>
+  <text x="20" y="620" font-size="11" fill="#555">Source: src/company_transfers/ (main.py, config.py, api/, domain/, clients/).</text>
+</svg>
+
+<h2>3. Endpoints</h2>
+
+<h3>3.1 <code>GET /health</code></h3>
+<p>Returns <code>200 {"status": "ok"}</code> <span class="src">(api/routes.py:22-24; tests/unit/test_api.py:15-19)</span>.
+It does not call the exchange-rate provider.</p>
+
+<h3>3.2 <code>POST /fees</code></h3>
+<p>Defined at <span class="src">api/routes.py:27-43</span>. The body is JSON.</p>
+<table>
+<tr><th>Field</th><th>Rule</th><th>Source</th></tr>
+<tr><td><code>amount</code></td><td>Decimal, greater than 0, at most 2 decimals. In <code>tests/unit/test_api.py</code> <code>0</code>, <code>-5.00</code> and <code>10.001</code> give 422.</td><td>api/schemas.py:12; tests/unit/test_api.py:54-56</td></tr>
+<tr><td><code>currency</code></td><td><code>"MDL"</code> or <code>"EUR"</code></td><td>api/schemas.py:13</td></tr>
+<tr><td><code>type</code></td><td><code>"standard"</code> or <code>"instant"</code></td><td>api/schemas.py:14</td></tr>
+<tr><td><code>customer_segment</code></td><td><code>"retail"</code> or <code>"premium"</code></td><td>api/schemas.py:15</td></tr>
+</table>
+<p>All four fields are required (a body without <code>amount</code> gives 422, tests/unit/test_api.py:59).
+The repository sends <code>amount</code> as a JSON number (tests/unit/test_api.py:23) and as a string
+(run-local.ps1:122). <span class="tag assume">ASSUMPTION</span> both are accepted by pydantic; the string form is used by
+<code>run-local.ps1</code>, which prints the answer, and I did not run it.</p>
+
+<p>Response, 200: <code>{"fee": &lt;number&gt;, "currency": "MDL", "rule": "&lt;string&gt;"}</code>
+<span class="src">(api/schemas.py:18-21)</span>. The fee is always in MDL (schemas.py:20) and is written with two decimals, for example
+<code>"fee": 10.00</code> <span class="src">(tests/unit/test_api.py:33-36)</span>. If your client parses JSON numbers as
+floats, parse them as decimals: the repository's own tests use <code>parse_float=Decimal</code>
+<span class="src">(tests/unit/test_api.py:8)</span>.</p>
+
+<table>
+<tr><th>Status</th><th>Body</th><th>When</th><th>Source</th></tr>
+<tr><td>200</td><td><code>{"fee", "currency", "rule"}</code></td><td>fee computed</td><td>api/routes.py:42-43</td></tr>
+<tr><td>422</td><td><code>{"error": "limit exceeded"}</code></td><td>instant transfer above MDL 100,000.00 (converted amount for EUR)</td><td>domain/fees.py:57-58; main.py:31-33</td></tr>
+<tr><td>422</td><td>FastAPI validation body</td><td>invalid or missing field</td><td>tests/unit/test_api.py:62-63</td></tr>
+<tr><td>502</td><td><code>{"error": "exchange rate unavailable"}</code></td><td>the rate could not be obtained. This includes a provider answer that is not valid JSON or lacks a field, and a timeout.</td><td>main.py:35-37; clients/exchange_rate.py:59</td></tr>
+</table>
+<p>The shape of the validation-error body is not defined in the repository.
+<span class="tag assume">ASSUMPTION</span> it is FastAPI's default (<code>{"detail": [...]}</code>).
+<span class="tag missing">MISSING</span> a documented contract for it.</p>
+<p>The <code>rule</code> value is <code>&lt;type&gt;-&lt;currency in lower case&gt;</code>
+<span class="src">(domain/fees.py:28-29)</span>: <code>standard-mdl</code>, <code>standard-eur</code>, <code>instant-mdl</code>,
+<code>instant-eur</code>.</p>
+
+<h3>3.3 Other routes</h3>
+<p><span class="tag assume">ASSUMPTION</span> <code>/docs</code>, <code>/redoc</code> and <code>/openapi.json</code> exist. <code>main.py:27</code> creates
+<code>FastAPI(...)</code> without disabling them; I did not run the service to confirm. No authentication is implemented
+<span class="src">(README.md:192)</span>.</p>
+
+<h2>4. Fee rules as implemented</h2>
+<table>
+<tr><th>Case</th><th>Rule in the code</th><th>Source</th></tr>
+<tr><td>Standard, MDL</td><td>0.5% of the amount, rounded half up to 2 decimals, minimum 5.00, maximum 50.00</td><td>domain/fees.py:17-19,34-35</td></tr>
+<tr><td>Standard, EUR</td><td>Convert to MDL with the EUR to MDL rate, truncated to 2 decimals; apply 0.5%, rounded half even; same minimum and maximum</td><td>domain/fees.py:52-54,62-64</td></tr>
+<tr><td>Instant, retail</td><td>Standard fee plus MDL 10.00</td><td>domain/fees.py:20,59-60</td></tr>
+<tr><td>Instant, premium</td><td>Standard fee only</td><td>domain/fees.py:59-60</td></tr>
+<tr><td>Instant, above MDL 100,000.00</td><td>422 <code>limit exceeded</code>. MDL 100,000.00 itself is accepted (the test is <code>&gt;</code>).</td><td>domain/fees.py:21,57-58</td></tr>
+<tr><td>Segment, standard transfer</td><td>No effect on the fee</td><td>domain/fees.py:46; tests/unit/test_standard_mdl_fee.py:53</td></tr>
+</table>
+<p>Examples, taken from the tests and the feature file, not from a running service:</p>
+<ul>
+<li>MDL 2000.00, standard, retail: fee <code>10.00</code>, rule <code>standard-mdl</code> (tests/unit/test_api.py:22-30).</li>
+<li>MDL 2000.00, instant, retail: fee <code>20.00</code> (features/instant-fee.feature:24).</li>
+<li>MDL 2000.00, instant, premium: fee <code>10.00</code> (features/instant-fee.feature:28-31).</li>
+<li>EUR 500.00, instant, retail, rate 19.8765: fee <code>59.69</code> (features/instant-fee.feature:44-47).</li>
+</ul>
+<p>The service uses only the <code>rate</code> field of the provider answer; <code>as_of</code> is parsed
+(clients/exchange_rate.py:57) but not used (domain/fees.py:63). A rate is requested for every EUR transfer; no
+cache is in the code (domain/fees.py:62-64).</p>
+
+<h3>Known conflicts</h3>
+<ul>
+<li>EUR rounding. The published tariff says the converted amount is not rounded and the fee is rounded half up
+(docs/fee-rules.md:16-17). The code truncates the converted amount (domain/fees.py:64) and rounds the fee half even
+(domain/fees.py:53). The two can differ by 0.01. This is an open dispute (README.md:165-167; incidents/INC-2026-0412.md).
+<span class="tag missing">MISSING</span> the decision on which rounding is correct (CLAUDE.md, section 3).</li>
+<li>The instant fee is not in the published tariff (docs/fee-rules.md:22). Its rules come from
+features/instant-fee.feature:7-11. <span class="tag missing">MISSING</span> the published instant tariff.</li>
+<li>Instant transfer at night is not implemented. The feature expects 25.00 (features/instant-fee.feature:49-55) and the
+service charges 20.00. <span class="tag missing">MISSING</span> the definition of "night" and how the service learns the time.</li>
+</ul>
+
+<h2>5. Dependencies and configuration</h2>
+<table>
+<tr><th>Dependency</th><th>Use</th><th>Source</th></tr>
+<tr><td>Python 3.10 or newer</td><td>runtime</td><td>pyproject.toml:10</td></tr>
+<tr><td><code>fastapi&gt;=0.110</code>, <code>uvicorn&gt;=0.29</code>, <code>simplejson&gt;=3.19</code></td><td>runtime packages (pydantic comes with FastAPI)</td><td>pyproject.toml:11-15; api/schemas.py:8</td></tr>
+<tr><td>Exchange-rate provider</td><td>EUR to MDL rate, EUR transfers only</td><td>clients/exchange_rate.py:3-6; domain/fees.py:52</td></tr>
+</table>
+<table>
+<tr><th>Environment variable</th><th>Default</th><th>Effect</th><th>Source</th></tr>
+<tr><td><code>RATES_BASE_URL</code></td><td>unset</td><td>unset or empty: fixed rate 19.8765, no network. Set: the HTTP client is used.</td><td>config.py:16; main.py:19-23; README.md:96-97</td></tr>
+<tr><td><code>RATES_API_KEY</code></td><td>unset</td><td>sent as header <code>X-Api-Key</code> when set</td><td>config.py:17; clients/exchange_rate.py:47-48</td></tr>
+<tr><td><code>RATES_TIMEOUT_SECONDS</code></td><td>5</td><td>timeout of the provider call. A non-numeric value stops the start-up: <code>float()</code> (config.py:18) runs when <code>main.py</code> builds <code>app</code> (main.py:42).</td><td>config.py:18</td></tr>
+</table>
+<p>Provider contract the client expects: <code>GET {base_url}/rates?from=EUR&amp;to=MDL</code>, answer
+<code>200 {"from": "EUR", "to": "MDL", "rate": 19.8765, "as_of": "2026-10-19"}</code>
+<span class="src">(clients/exchange_rate.py:3-6)</span>. <span class="tag assume">ASSUMPTION</span> this matches the real provider
+(CLAUDE.md, section 2). The <code>.env</code> file holds fake values and is not loaded automatically
+<span class="src">(README.md:184-185)</span>: set the variables in your shell.</p>
+
+<h2>6. Run it</h2>
+<p>Run every command from the repository root. Setup needs network access (README.md:39). The commands in this section
+come from README.md, Makefile and run-local.ps1. I did not start the service; I ran only the test commands of section 7.</p>
+
+<h3>6.1 Set up</h3>
+<p>Windows PowerShell, the script of the project (README.md:25), or by hand (README.md:63-66):</p>
+<pre>powershell -ExecutionPolicy Bypass -File .\step-3-setup.ps1
+
+py -3 -m venv .venv
+.venv\Scripts\python -m pip install -r requirements-dev.txt</pre>
+<p>macOS Terminal (README.md:57-59):</p>
+<pre>python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt</pre>
+<p>This installs the <code>dev</code> extra too (requirements-dev.txt, README.md:183), which includes tools you do not need to call the service.</p>
+
+<h3>6.2 Start it</h3>
+<p>Windows PowerShell (README.md:86), in the foreground:</p>
+<pre>.venv\Scripts\python -m uvicorn company_transfers.main:app --reload --port 8000</pre>
+<p>Or in the background, with a health check and one fee call (run-local.ps1:2-3,81-133):</p>
+<pre>.\run-local.ps1
+.\run-local.ps1 stop</pre>
+<p><code>run-local.ps1</code> removes <code>RATES_BASE_URL</code> from its environment, so it always uses the fixed rate
+(run-local.ps1:94-95).</p>
+<p>macOS Terminal (README.md:77; <code>make run</code> does the same, Makefile:13-14):</p>
+<pre>.venv/bin/python -m uvicorn company_transfers.main:app --reload --port 8000</pre>
+<p>Use the real provider: set the variable before starting. <span class="tag missing">MISSING</span> the provider's real URL.</p>
+<pre># Windows PowerShell
+$env:RATES_BASE_URL = "&lt;provider base url&gt;"
+$env:RATES_API_KEY = "&lt;key, if the provider needs one&gt;"
+
+# macOS Terminal
+export RATES_BASE_URL="&lt;provider base url&gt;"
+export RATES_API_KEY="&lt;key, if the provider needs one&gt;"</pre>
+
+<h3>6.3 Call it</h3>
+<p>In Windows PowerShell 5.1, <code>curl</code> is an alias of <code>Invoke-WebRequest</code>, so the macOS form does not work there
+(README.md:82). Windows PowerShell, from a second terminal (based on run-local.ps1:122-125):</p>
+<pre>$body = '{"amount": "2000.00", "currency": "MDL", "type": "instant", "customer_segment": "retail"}'
+Invoke-WebRequest -UseBasicParsing -Method Post -Uri http://localhost:8000/fees -ContentType "application/json" -Body $body | Select-Object -ExpandProperty Content
+Invoke-WebRequest -UseBasicParsing -Uri http://localhost:8000/health | Select-Object -ExpandProperty Content</pre>
+<p>macOS Terminal (README.md:78-79):</p>
+<pre>curl -X POST http://localhost:8000/fees -H "Content-Type: application/json" \
+  -d '{"amount": 2000.00, "currency": "MDL", "type": "instant", "customer_segment": "retail"}'
+curl http://localhost:8000/health</pre>
+<p>Expected answers, derived from features/instant-fee.feature:24 and tests/unit/test_api.py:19,33-36, not observed from a running service:
+<code>{"fee": 20.00, "currency": "MDL", "rule": "instant-mdl"}</code> and <code>{"status":"ok"}</code>.
+Port 8000 comes from the run command; <span class="tag missing">MISSING</span> the address of any shared or deployed instance.</p>
+
+<h2>7. Test it</h2>
+<p>Windows PowerShell:</p>
+<pre>.venv\Scripts\python -m pytest
+.venv\Scripts\python -m behave
+.venv\Scripts\python -m ruff check .
+.venv\Scripts\python -m ruff format --check .</pre>
+<p>macOS Terminal (<code>make test</code>, <code>make bdd</code>, <code>make lint</code> do the same, Makefile:16-24):</p>
+<pre>.venv/bin/python -m pytest
+.venv/bin/python -m behave
+.venv/bin/python -m ruff check .
+.venv/bin/python -m ruff format --check .</pre>
+<p>Result observed on Windows, in the repository <code>.venv</code>, on 2026-10-14: pytest, 45 passed. behave, 8 scenarios passed and 1 error
+(<code>features/instant-fee.feature:49</code>, "Instant transfer at night"), exit code 1. ruff check, all checks passed.
+ruff format check, 35 files already formatted. The behave error is expected: the night rule is not implemented
+(README.md:108-110). pytest collects <code>tests/unit</code> only; behave collects <code>features/</code>
+(pyproject.toml:31-36). Tests use no network: they use <code>FixedRateClient</code> (features/environment.py:3,13).
+I did not run the macOS commands.</p>
+<p><span class="tag assume">ASSUMPTION</span> the pipeline runs Python 3.11 and <code>pytest</code> only (CLAUDE.md, section 2).
+It does not run behave or ruff. I did not open <code>.github/workflows/</code>.</p>
+
+<h2>8. Assumptions and missing information</h2>
+<h3>Assumptions</h3>
+<ul>
+<li><span class="tag assume">ASSUMPTION</span> <code>/docs</code>, <code>/redoc</code>, <code>/openapi.json</code> are served (FastAPI default; main.py:27).</li>
+<li><span class="tag assume">ASSUMPTION</span> the validation-error 422 body is FastAPI's default.</li>
+<li><span class="tag assume">ASSUMPTION</span> <code>amount</code> as a string and as a number are both accepted (tests/unit/test_api.py:23; run-local.ps1:122).</li>
+<li><span class="tag assume">ASSUMPTION</span> the provider contract in clients/exchange_rate.py:3-6 matches the real provider.</li>
+<li><span class="tag assume">ASSUMPTION</span> the service keeps no state between calls: no storage code in the modules I read.</li>
+<li><span class="tag assume">ASSUMPTION</span> Python 3.10 works; CI tests 3.11 only and local runs used 3.14 (CLAUDE.md, section 3).</li>
+<li><span class="tag assume">ASSUMPTION</span> the macOS commands work; they were not run here.</li>
+</ul>
+<h3>Missing</h3>
+<ul>
+<li><span class="tag missing">MISSING</span> the correct EUR rounding (code and tariff disagree).</li>
+<li><span class="tag missing">MISSING</span> the published instant-transfer tariff.</li>
+<li><span class="tag missing">MISSING</span> the definition of "night" for instant transfers.</li>
+<li><span class="tag missing">MISSING</span> any authentication or authorisation on the API (README.md:192).</li>
+<li><span class="tag missing">MISSING</span> the address of a shared or deployed instance, and any environment list.</li>
+<li><span class="tag missing">MISSING</span> the provider's real URL, and its documentation.</li>
+<li><span class="tag missing">MISSING</span> a documented contract for the validation-error body and an API version policy.</li>
+<li><span class="tag missing">MISSING</span> Pact (consumer contract) tests: declared, no code (README.md:189).</li>
+<li><span class="tag missing">MISSING</span> unit tests of the 502 path and of <code>HttpExchangeRateClient</code>. The 422 <code>limit exceeded</code> response is covered through HTTP only by behave (features/instant-fee.feature:33-42), not by pytest.</li>
+<li><span class="tag missing">MISSING</span> the caller of <code>mask_iban</code>; no module in <code>src/</code> uses it.</li>
+<li><span class="tag missing">MISSING</span> service levels, rate limits and performance data.</li>
+</ul>
+
+</body>
+</html>

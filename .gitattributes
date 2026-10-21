@@ -1,0 +1,13 @@
+# Training material. Same line endings on Windows and macOS.
+* text=auto eol=lf
+*.png binary
+*.jar binary
+# Windows scripts keep CRLF.
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+# Shell scripts and the Maven wrapper keep LF: a CRLF checkout breaks them on macOS.
+*.sh text eol=lf
+/mvnw text eol=lf
+# Double-click launchers for macOS keep LF.
+*.command text eol=lf
